@@ -1,0 +1,38 @@
+version: '3.3'
+services:
+  master:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - PARCS_ARGS=master
+  worker1:
+    build: .
+    network_mode: host
+    environment:
+      - PARCS_ARGS=worker localhost 8080 3000
+  worker2:
+    build: .
+    network_mode: host
+    environment:
+      - PARCS_ARGS=worker localhost 8080 3001
+  worker3:
+    build: .
+    network_mode: host
+    environment:
+      - PARCS_ARGS=worker localhost 8080 3002
+  worker4:
+    build: .
+    network_mode: host
+    environment:
+      - PARCS_ARGS=worker localhost 8080 3003
+  worker5:
+    build: .
+    network_mode: host
+    environment:
+      - PARCS_ARGS=worker localhost 8080 3004
+  worker6:
+    build: .
+    network_mode: host
+    environment:
+      - PARCS_ARGS=worker localhost 8080 3005

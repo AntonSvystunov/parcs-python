@@ -5,3 +5,4 @@ commands.txt
 .vagrant
 test
 *.backup
+venv*/

@@ -32,7 +32,7 @@ class Config:
 
         master = configuration.getboolean(Config.NODE_SECTION, 'master')
         ip = configuration.get(Config.NODE_SECTION, 'ip') if configuration.has_option(Config.NODE_SECTION,
-                                                                                             'ip') else None
+                                                                                      'ip') else None
         port = configuration.getint(Config.NODE_SECTION, 'port') if configuration.has_option(Config.NODE_SECTION,
                                                                                              'port') else None
 
@@ -205,10 +205,28 @@ def add_job():
     log.info('Job %d was scheduled. Scheduled queue size - %d.' % (job.id, app.scheduled_jobs.qsize() + 1))
     app.scheduled_jobs.put(job)
 
-    return render_template('add_job.html', title='Add Job')
+    return jsonify(job.serialize())
 
 
-# Inernal api
+@app.route('/api/job', methods=['GET'])
+def get_jobs():
+    if not app.node.is_master_node():
+        return bad_request()
+    return jsonify(jobs=[j.serialize() for j in app.node.jobs])
+
+
+@app.route('/api/job/<int:job_id>', methods=['GET'])
+def get_job(job_id):
+    if not app.node.is_master_node():
+        return bad_request()
+
+    job = app.node.find_job(job_id)
+    if not job:
+        return not_found()
+    return jsonify(job.serialize())
+
+
+# Internal api
 @app.route('/api/internal/heartbeat')
 def heartbeat():
     return ok()

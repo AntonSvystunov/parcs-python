@@ -53,5 +53,17 @@ class Job:
     def title(self):
         return '%s [reason: %s]' % (self.name, self.status) if self.failed else self.name
 
+    def serialize(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'failed': self.failed,
+            'start_time': self.start_time,
+            'duration': self.duration,
+            'duration_str': self.duration_str,
+            'status': self.status,
+            'aborted': self.aborted
+        }
+
 
 log = logging.getLogger('Job')

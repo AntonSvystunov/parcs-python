@@ -1,5 +1,5 @@
 Pyro4
 netifaces
-py-cpuinfo
+py-cpuinfo==5.0.0
 flask
 requests

@@ -7,7 +7,7 @@ $(document).ready(function () {
             type: 'DELETE',
             success: function (result) {
                 setTimeout(function () {
-                    location.reload();
+                    window.location.href = "/jobs";
                 }, 2000);
             },
             error: function (result) {
