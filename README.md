@@ -33,6 +33,12 @@ You need to record the external IP, it will be referred to as `$MASTER_IP` later
 
 3. The PARCS web interface will be available at http://$MASTER_IP:8080
 
-## Microsoft Azure deployment scripts
+## Microsoft Azure deployment tutorial
 
-Can be found [here](/examples/azure/README.md)
+1. Go to [Azure Portal](https://portal.azure.com/)
+2. Create a resource group
+3. Search for *Deploy from a custom template* action
+4. Upload [*template.json*](/examples/azure/template.json) and run deployment
+5. Note: make sure, that public domain name is unique
+6. Enable container instances  
+
