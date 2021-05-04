@@ -1,0 +1,732 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "azureFirewalls_parcs_firewall_name": {
+            "defaultValue": "parcs-firewall",
+            "type": "String"
+        },
+        "routeTables_Firewall_rt_table_name": {
+            "defaultValue": "Firewall-rt-table",
+            "type": "String"
+        },
+        "publicIPAddresses_parcs_public_ip_name": {
+            "defaultValue": "parcs-public-ip",
+            "type": "String"
+        },
+        "virtualNetworks_parcs_containers_vnet_name": {
+            "defaultValue": "parcs-containers-vnet",
+            "type": "String"
+        },
+        "containerGroups_as_parcs_master_name": {
+            "defaultValue": "as-parcs-master",
+            "type": "String"
+        },
+        "containerGroups_as_parcs_worker_01_name": {
+            "defaultValue": "as-parcs-worker-01",
+            "type": "String"
+        },
+        "containerGroups_as_parcs_worker_02_name": {
+            "defaultValue": "as-parcs-worker-02",
+            "type": "String"
+        },
+        "containerGroups_as_parcs_worker_03_name": {
+            "defaultValue": "as-parcs-worker-03",
+            "type": "String"
+        },
+        "containerGroups_as_parcs_worker_04_name": {
+            "defaultValue": "as-parcs-worker-04",
+            "type": "String"
+        },
+        "networkProfiles_as_parcs_master_networkProfile_name": {
+            "defaultValue": "as-parcs-master-networkProfile",
+            "type": "String"
+        },
+        "networkProfiles_as_parcs_worker_01_networkProfile_name": {
+            "defaultValue": "as-parcs-worker-01-networkProfile",
+            "type": "String"
+        },
+        "networkProfiles_as_parcs_worker_02_networkProfile_name": {
+            "defaultValue": "as-parcs-worker-02-networkProfile",
+            "type": "String"
+        },
+        "networkProfiles_as_parcs_worker_03_networkProfile_name": {
+            "defaultValue": "as-parcs-worker-03-networkProfile",
+            "type": "String"
+        },
+        "networkProfiles_as_parcs_worker_04_networkProfile_name": {
+            "defaultValue": "as-parcs-worker-04-networkProfile",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('publicIPAddresses_parcs_public_ip_name')]",
+            "location": "westeurope",
+            "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+            },
+            "zones": [
+                "3",
+                "2",
+                "1"
+            ],
+            "properties": {
+                "ipAddress": "20.50.232.122",
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "dnsSettings": {
+                    "domainNameLabel": "as-pacrs-master-public",
+                    "fqdn": "as-pacrs-master-public.westeurope.cloudapp.azure.com"
+                },
+                "ipTags": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('routeTables_Firewall_rt_table_name')]",
+            "location": "westeurope",
+            "properties": {
+                "disableBgpRoutePropagation": false,
+                "routes": [
+                    {
+                        "name": "Dg-Route",
+                        "properties": {
+                            "addressPrefix": "0.0.0.0/0",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.0.0.4",
+                            "hasBgpOverride": false
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2021-03-01",
+            "name": "[parameters('containerGroups_as_parcs_master_name')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkProfiles', parameters('networkProfiles_as_parcs_master_networkProfile_name'))]"
+            ],
+            "properties": {
+                "sku": "Standard",
+                "containers": [
+                    {
+                        "name": "[parameters('containerGroups_as_parcs_master_name')]",
+                        "properties": {
+                            "image": "registry.hub.docker.com/hummer12007/parcs-node",
+                            "ports": [
+                                {
+                                    "protocol": "TCP",
+                                    "port": 80
+                                },
+                                {
+                                    "protocol": "TCP",
+                                    "port": 8080
+                                }
+                            ],
+                            "environmentVariables": [
+                                {
+                                    "name": "PARCS_ARGS",
+                                    "value": "master"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 2,
+                                    "cpu": 1
+                                }
+                            }
+                        }
+                    }
+                ],
+                "initContainers": [],
+                "restartPolicy": "Never",
+                "osType": "Linux",
+                "networkProfile": {
+                    "id": "[resourceId('Microsoft.Network/networkProfiles', parameters('networkProfiles_as_parcs_master_networkProfile_name'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2021-03-01",
+            "name": "[parameters('containerGroups_as_parcs_worker_01_name')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkProfiles', parameters('networkProfiles_as_parcs_worker_01_networkProfile_name'))]"
+            ],
+            "properties": {
+                "sku": "Standard",
+                "containers": [
+                    {
+                        "name": "[parameters('containerGroups_as_parcs_worker_01_name')]",
+                        "properties": {
+                            "image": "registry.hub.docker.com/hummer12007/parcs-node",
+                            "ports": [
+                                {
+                                    "protocol": "TCP",
+                                    "port": 80
+                                },
+                                {
+                                    "protocol": "TCP",
+                                    "port": 8080
+                                },
+                                {
+                                    "protocol": "TCP",
+                                    "port": 3000
+                                }
+                            ],
+                            "environmentVariables": [
+                                {
+                                    "name": "PARCS_ARGS",
+                                    "value": "worker 10.0.1.4"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 0.5,
+                                    "cpu": 1
+                                }
+                            }
+                        }
+                    }
+                ],
+                "initContainers": [],
+                "restartPolicy": "Never",
+                "osType": "Linux",
+                "networkProfile": {
+                    "id": "[resourceId('Microsoft.Network/networkProfiles', parameters('networkProfiles_as_parcs_worker_01_networkProfile_name'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2021-03-01",
+            "name": "[parameters('containerGroups_as_parcs_worker_02_name')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkProfiles', parameters('networkProfiles_as_parcs_worker_02_networkProfile_name'))]"
+            ],
+            "properties": {
+                "sku": "Standard",
+                "containers": [
+                    {
+                        "name": "[parameters('containerGroups_as_parcs_worker_02_name')]",
+                        "properties": {
+                            "image": "registry.hub.docker.com/hummer12007/parcs-node",
+                            "ports": [
+                                {
+                                    "protocol": "TCP",
+                                    "port": 80
+                                },
+                                {
+                                    "protocol": "TCP",
+                                    "port": 8080
+                                },
+                                {
+                                    "protocol": "TCP",
+                                    "port": 3000
+                                }
+                            ],
+                            "environmentVariables": [
+                                {
+                                    "name": "PARCS_ARGS",
+                                    "value": "worker 10.0.1.4"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 0.5,
+                                    "cpu": 1
+                                }
+                            }
+                        }
+                    }
+                ],
+                "initContainers": [],
+                "restartPolicy": "Never",
+                "osType": "Linux",
+                "networkProfile": {
+                    "id": "[resourceId('Microsoft.Network/networkProfiles', parameters('networkProfiles_as_parcs_worker_02_networkProfile_name'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2021-03-01",
+            "name": "[parameters('containerGroups_as_parcs_worker_03_name')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkProfiles', parameters('networkProfiles_as_parcs_worker_03_networkProfile_name'))]"
+            ],
+            "properties": {
+                "sku": "Standard",
+                "containers": [
+                    {
+                        "name": "[parameters('containerGroups_as_parcs_worker_03_name')]",
+                        "properties": {
+                            "image": "registry.hub.docker.com/hummer12007/parcs-node",
+                            "ports": [
+                                {
+                                    "protocol": "TCP",
+                                    "port": 80
+                                },
+                                {
+                                    "protocol": "TCP",
+                                    "port": 8080
+                                },
+                                {
+                                    "protocol": "TCP",
+                                    "port": 3000
+                                }
+                            ],
+                            "environmentVariables": [
+                                {
+                                    "name": "PARCS_ARGS",
+                                    "value": "worker 10.0.1.4"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 0.5,
+                                    "cpu": 1
+                                }
+                            }
+                        }
+                    }
+                ],
+                "initContainers": [],
+                "restartPolicy": "Never",
+                "osType": "Linux",
+                "networkProfile": {
+                    "id": "[resourceId('Microsoft.Network/networkProfiles', parameters('networkProfiles_as_parcs_worker_03_networkProfile_name'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2021-03-01",
+            "name": "[parameters('containerGroups_as_parcs_worker_04_name')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkProfiles', parameters('networkProfiles_as_parcs_worker_04_networkProfile_name'))]"
+            ],
+            "properties": {
+                "sku": "Standard",
+                "containers": [
+                    {
+                        "name": "[parameters('containerGroups_as_parcs_worker_04_name')]",
+                        "properties": {
+                            "image": "registry.hub.docker.com/hummer12007/parcs-node",
+                            "ports": [
+                                {
+                                    "protocol": "TCP",
+                                    "port": 80
+                                },
+                                {
+                                    "protocol": "TCP",
+                                    "port": 8080
+                                },
+                                {
+                                    "protocol": "TCP",
+                                    "port": 3000
+                                }
+                            ],
+                            "environmentVariables": [
+                                {
+                                    "name": "PARCS_ARGS",
+                                    "value": "worker 10.0.1.4"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 0.5,
+                                    "cpu": 1
+                                }
+                            }
+                        }
+                    }
+                ],
+                "initContainers": [],
+                "restartPolicy": "Never",
+                "osType": "Linux",
+                "networkProfile": {
+                    "id": "[resourceId('Microsoft.Network/networkProfiles', parameters('networkProfiles_as_parcs_worker_04_networkProfile_name'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkProfiles",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('networkProfiles_as_parcs_master_networkProfile_name')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_parcs_containers_vnet_name'), 'parcs-subnet')]"
+            ],
+            "properties": {
+                "containerNetworkInterfaceConfigurations": [
+                    {
+                        "name": "eth0",
+                        "properties": {
+                            "ipConfigurations": [
+                                {
+                                    "name": "ipconfigprofile1",
+                                    "properties": {
+                                        "subnet": {
+                                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_parcs_containers_vnet_name'), 'parcs-subnet')]"
+                                        }
+                                    }
+                                }
+                            ],
+                            "containerNetworkInterfaces": [
+                                {
+                                    "id": "[concat(resourceId('Microsoft.Network/networkProfiles', parameters('networkProfiles_as_parcs_master_networkProfile_name')), '/containerNetworkInterfaces/6e9cf96f-54ae-4997-a70d-ef03e76b9b36_eth0')]"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkProfiles",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('networkProfiles_as_parcs_worker_01_networkProfile_name')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_parcs_containers_vnet_name'), 'parcs-subnet')]"
+            ],
+            "properties": {
+                "containerNetworkInterfaceConfigurations": [
+                    {
+                        "name": "eth0",
+                        "properties": {
+                            "ipConfigurations": [
+                                {
+                                    "name": "ipconfigprofile1",
+                                    "properties": {
+                                        "subnet": {
+                                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_parcs_containers_vnet_name'), 'parcs-subnet')]"
+                                        }
+                                    }
+                                }
+                            ],
+                            "containerNetworkInterfaces": [
+                                {
+                                    "id": "[concat(resourceId('Microsoft.Network/networkProfiles', parameters('networkProfiles_as_parcs_worker_01_networkProfile_name')), '/containerNetworkInterfaces/5534b891-1451-45bc-b5cd-8510f1cb0da6_eth0')]"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkProfiles",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('networkProfiles_as_parcs_worker_02_networkProfile_name')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_parcs_containers_vnet_name'), 'parcs-subnet')]"
+            ],
+            "properties": {
+                "containerNetworkInterfaceConfigurations": [
+                    {
+                        "name": "eth0",
+                        "properties": {
+                            "ipConfigurations": [
+                                {
+                                    "name": "ipconfigprofile1",
+                                    "properties": {
+                                        "subnet": {
+                                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_parcs_containers_vnet_name'), 'parcs-subnet')]"
+                                        }
+                                    }
+                                }
+                            ],
+                            "containerNetworkInterfaces": [
+                                {
+                                    "id": "[concat(resourceId('Microsoft.Network/networkProfiles', parameters('networkProfiles_as_parcs_worker_02_networkProfile_name')), '/containerNetworkInterfaces/618c3977-3faa-47e0-85c2-e6bab77273f7_eth0')]"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkProfiles",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('networkProfiles_as_parcs_worker_03_networkProfile_name')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_parcs_containers_vnet_name'), 'parcs-subnet')]"
+            ],
+            "properties": {
+                "containerNetworkInterfaceConfigurations": [
+                    {
+                        "name": "eth0",
+                        "properties": {
+                            "ipConfigurations": [
+                                {
+                                    "name": "ipconfigprofile1",
+                                    "properties": {
+                                        "subnet": {
+                                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_parcs_containers_vnet_name'), 'parcs-subnet')]"
+                                        }
+                                    }
+                                }
+                            ],
+                            "containerNetworkInterfaces": [
+                                {
+                                    "id": "[concat(resourceId('Microsoft.Network/networkProfiles', parameters('networkProfiles_as_parcs_worker_03_networkProfile_name')), '/containerNetworkInterfaces/7f91377a-f7aa-4c3c-88b0-a70762f5e958_eth0')]"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkProfiles",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('networkProfiles_as_parcs_worker_04_networkProfile_name')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_parcs_containers_vnet_name'), 'parcs-subnet')]"
+            ],
+            "properties": {
+                "containerNetworkInterfaceConfigurations": [
+                    {
+                        "name": "eth0",
+                        "properties": {
+                            "ipConfigurations": [
+                                {
+                                    "name": "ipconfigprofile1",
+                                    "properties": {
+                                        "subnet": {
+                                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_parcs_containers_vnet_name'), 'parcs-subnet')]"
+                                        }
+                                    }
+                                }
+                            ],
+                            "containerNetworkInterfaces": [
+                                {
+                                    "id": "[concat(resourceId('Microsoft.Network/networkProfiles', parameters('networkProfiles_as_parcs_worker_04_networkProfile_name')), '/containerNetworkInterfaces/c02aba8e-409a-4578-8f94-6af59011486c_eth0')]"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-11-01",
+            "name": "[concat(parameters('routeTables_Firewall_rt_table_name'), '/Dg-Route')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Firewall_rt_table_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "0.0.0.0/0",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.0.0.4",
+                "hasBgpOverride": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('virtualNetworks_parcs_containers_vnet_name')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Firewall_rt_table_name'))]"
+            ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "AzureFirewallSubnet",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24",
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "parcs-subnet",
+                        "properties": {
+                            "addressPrefix": "10.0.1.0/24",
+                            "routeTable": {
+                                "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Firewall_rt_table_name'))]"
+                            },
+                            "serviceEndpoints": [],
+                            "delegations": [
+                                {
+                                    "name": "ACIDelegationService",
+                                    "properties": {
+                                        "serviceName": "Microsoft.ContainerInstance/containerGroups"
+                                    }
+                                }
+                            ],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    }
+                ],
+                "virtualNetworkPeerings": [],
+                "enableDdosProtection": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-11-01",
+            "name": "[concat(parameters('virtualNetworks_parcs_containers_vnet_name'), '/AzureFirewallSubnet')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_parcs_containers_vnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.0.0.0/24",
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/azureFirewalls",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('azureFirewalls_parcs_firewall_name')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_parcs_public_ip_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_parcs_containers_vnet_name'), 'AzureFirewallSubnet')]"
+            ],
+            "properties": {
+                "sku": {
+                    "name": "AZFW_VNet",
+                    "tier": "Standard"
+                },
+                "threatIntelMode": "Alert",
+                "additionalProperties": {},
+                "ipConfigurations": [
+                    {
+                        "name": "parcs-public-ip",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_parcs_public_ip_name'))]"
+                            },
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_parcs_containers_vnet_name'), 'AzureFirewallSubnet')]"
+                            }
+                        }
+                    }
+                ],
+                "networkRuleCollections": [],
+                "applicationRuleCollections": [
+                    {
+                        "name": "PARCSMasterCollection",
+                        "properties": {
+                            "priority": 200,
+                            "action": {
+                                "type": "Allow"
+                            },
+                            "rules": [
+                                {
+                                    "name": "Allow-CheckIP",
+                                    "protocols": [
+                                        {
+                                            "protocolType": "Http",
+                                            "port": 80
+                                        },
+                                        {
+                                            "protocolType": "Http",
+                                            "port": 8080
+                                        }
+                                    ],
+                                    "fqdnTags": [],
+                                    "targetFqdns": [
+                                        "checkip.dyndns.org"
+                                    ],
+                                    "sourceAddresses": [
+                                        "10.0.0.0/24"
+                                    ],
+                                    "sourceIpGroups": []
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "natRuleCollections": [
+                    {
+                        "name": "PARCSNATCollection",
+                        "properties": {
+                            "priority": 200,
+                            "action": {
+                                "type": "Dnat"
+                            },
+                            "rules": [
+                                {
+                                    "name": "PARCS_RULE",
+                                    "protocols": [
+                                        "TCP"
+                                    ],
+                                    "translatedAddress": "10.0.1.4",
+                                    "translatedPort": "8080",
+                                    "sourceAddresses": [
+                                        "*"
+                                    ],
+                                    "sourceIpGroups": [],
+                                    "destinationAddresses": [
+                                        "20.50.232.122"
+                                    ],
+                                    "destinationPorts": [
+                                        "8080"
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-11-01",
+            "name": "[concat(parameters('virtualNetworks_parcs_containers_vnet_name'), '/parcs-subnet')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_parcs_containers_vnet_name'))]",
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Firewall_rt_table_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.0.1.0/24",
+                "routeTable": {
+                    "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Firewall_rt_table_name'))]"
+                },
+                "serviceEndpoints": [],
+                "delegations": [
+                    {
+                        "name": "ACIDelegationService",
+                        "properties": {
+                            "serviceName": "Microsoft.ContainerInstance/containerGroups"
+                        }
+                    }
+                ],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        }
+    ]
+}

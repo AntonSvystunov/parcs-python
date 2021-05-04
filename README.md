@@ -33,3 +33,6 @@ You need to record the external IP, it will be referred to as `$MASTER_IP` later
 
 3. The PARCS web interface will be available at http://$MASTER_IP:8080
 
+## Microsoft Azure deployment scripts
+
+Can be found [here](/examples/azure/README.md)

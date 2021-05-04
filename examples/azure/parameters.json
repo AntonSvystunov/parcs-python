@@ -1,0 +1,48 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "azureFirewalls_parcs_firewall_name": {
+            "value": null
+        },
+        "routeTables_Firewall_rt_table_name": {
+            "value": null
+        },
+        "publicIPAddresses_parcs_public_ip_name": {
+            "value": null
+        },
+        "virtualNetworks_parcs_containers_vnet_name": {
+            "value": null
+        },
+        "containerGroups_as_parcs_master_name": {
+            "value": null
+        },
+        "containerGroups_as_parcs_worker_01_name": {
+            "value": null
+        },
+        "containerGroups_as_parcs_worker_02_name": {
+            "value": null
+        },
+        "containerGroups_as_parcs_worker_03_name": {
+            "value": null
+        },
+        "containerGroups_as_parcs_worker_04_name": {
+            "value": null
+        },
+        "networkProfiles_as_parcs_master_networkProfile_name": {
+            "value": null
+        },
+        "networkProfiles_as_parcs_worker_01_networkProfile_name": {
+            "value": null
+        },
+        "networkProfiles_as_parcs_worker_02_networkProfile_name": {
+            "value": null
+        },
+        "networkProfiles_as_parcs_worker_03_networkProfile_name": {
+            "value": null
+        },
+        "networkProfiles_as_parcs_worker_04_networkProfile_name": {
+            "value": null
+        }
+    }
+}
