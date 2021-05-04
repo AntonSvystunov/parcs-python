@@ -26,8 +26,9 @@ class Job:
         self.status = "Aborted"
         self.failed = True
         if self.start_time:
-            self.duration = (datetime.datetime.now() - self.start_time).seconds
-            self.duration_str = Job.get_duration_str(self.duration)
+            time_delta = Job.get_timedelta_from_start(self.start_time)
+            self.duration = time_delta.total_seconds() * 1000
+            self.duration_str = Job.get_duration_str(time_delta)
             self.duration_str = "ABORTED [%s]" % self.duration_str
         else:
             self.duration = -1
@@ -37,15 +38,19 @@ class Job:
     def end_job(self, failed=False, status=None):
         self.status = status
         self.failed = failed
-        self.duration = (datetime.datetime.now() - self.start_time).seconds
-        self.duration_str = Job.get_duration_str(self.duration)
+
+        time_delta = Job.get_timedelta_from_start(self.start_time)
+        self.duration = time_delta.total_seconds() * 1000
+        self.duration_str = Job.get_duration_str(time_delta)
         log.info('Job %d %s. Duration %s.', self.id, 'ended' if not failed else 'failed', self.duration_str)
 
     @staticmethod
-    def get_duration_str(duration):
-        hours, remainder = divmod(duration, 3600)
-        minutes, seconds = divmod(remainder, 60)
-        return '%s:%s:%s' % (hours, minutes, seconds)
+    def get_duration_str(time_delta):
+        return str(time_delta)
+
+    @staticmethod
+    def get_timedelta_from_start(start_time):
+        return datetime.datetime.now() - start_time
 
     def is_ended(self):
         return False if self.duration is None else True
